@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/syscall.h>
-#include <regex.h>
+#include "include/args.h"
 #include "include/compile.h"
 
 char **symbols;
@@ -22,7 +22,7 @@ static bool validateChar(char c)
 void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 {
 	/* Initialize this shit */
-	fprintf( \
+	fprintf(out, \
 		".text\n" \
 		".globl _start\n" \
 		".comm arr, 3000"
@@ -160,7 +160,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			i++;
 			int lsize = 0;
 			char *label = NULL;
-			while((i < procsize && validateChar(procbuf[i])) && procbuf[i] != ':')
+			while((i < size && validateChar(procbuf[i])) && procbuf[i] != ':')
 			{
 				lsize++;
 				label = realloc(label, lsize);
@@ -168,7 +168,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 				i++;
 			}
 			lsize++;
-			if(!validateChar(prcobuf[i]))
+			if(!validateChar(procbuf[i]))
 				free(label);
 			else
 			{
@@ -185,9 +185,9 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 				break;
 
 			i++;
-			int lsize = 0;
-			char *label = NULL;
-			while(i < procsize && validateChar(procbuf[i]))
+			lsize = 0;
+			label = NULL;
+			while(i < size && validateChar(procbuf[i]))
 			{
 				lsize++;
 				label = realloc(label, lsize);
@@ -197,7 +197,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			lsize++;
 			label = realloc(label, lsize);
 			label[lsize-1] = '\0';
-			fprintf(out, "jmp %s", label);
+			fprintf(out, "\tjmp %s\n", label);
 		}
 	}
 }

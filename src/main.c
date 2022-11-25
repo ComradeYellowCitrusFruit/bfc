@@ -90,9 +90,9 @@ int main(int argc, char **argv)
 			char *name;
 			if(idir != NULL)
 			{
-				name = malloc(strlen(argv[i] + strlen(idir) + 1);
+				name = malloc(strlen(argv[i]) + strlen(idir) + 1);
 				strcpy(name, idir);
-				strcat(name, argv[i];
+				strcat(name, argv[i]);
 			}
 			else
 				name = argv[i];
@@ -114,9 +114,9 @@ int main(int argc, char **argv)
 			char *name;
 			if(idir != NULL)
 			{
-				name = malloc(strlen(argv[i] + strlen(idir) + 1);
+				name = malloc(strlen(argv[i]) + strlen(idir) + 1);
 				strcpy(name, idir);
-				strcat(name, argv[i];
+				strcat(name, argv[i]);
 			}
 			else
 				name = argv[i];
@@ -132,7 +132,9 @@ int main(int argc, char **argv)
 			fclose(iF);
 
 			if(idir != NULL)
+			{
 				free(name);
+			}
 		}
 		else
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
@@ -160,7 +162,7 @@ int main(int argc, char **argv)
 		compile(procptr, procsize, of);
 	
 	/* Clean up time */
-	munmap(proctpr, procsize);
+	munmap(procptr, procsize);
 	close(procfd);
 	return 0;
 }

@@ -1,18 +1,18 @@
 incdir = ./
 srcdir = ./src
-CFLAGS=-O2 -ansi -wpedantic -wall -wextra
+CFLAGS=-O2 -Wpedantic -Wall
 
 .PHONY: all
 all: bfc
 
-bfc: main.o compile.o
+bfc: $(srcdir)/main.c compile.o optimized.o
 	$(CC) $^ $(CFLAGS) -I$(incdir) -o $@
 
-main.o: $(srcdir)/main.c
-	$(CC) $^ $(CFLAGS) -I$(incdir) -c -o $@
+compile.o: $(srcdir)/compile.c
+	$(CC) $^ $(CFLAGS) -I$(incdir) -c
 
-compile.o: $(srcdir)/compile.c $(srcdir)/optimized.c
-	$(CC) $^ $(CFLAGS) -I$(incdir) -c -o $@
+optimized.o: $(srcdir)/optimized.c
+	$(CC) $^ $(CFLAGS) -I$(incdir) -c
 
 .PHONY: clean
 clean:
