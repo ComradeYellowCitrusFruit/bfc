@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-void compile_optimized(void *procbuf, size_t size, FILE *out);
-void compile(void *procbuf, size_t size, FILE *out);
+void compile_optimized(uint8_t *procbuf, size_t size, FILE *out);
+void compile(uint8_t *procbuf, size_t size, FILE *out);
 
 #endif
