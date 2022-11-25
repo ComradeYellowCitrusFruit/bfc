@@ -5,12 +5,19 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <regex.h>
 #include "include/compile.h"
 
 char **symbols;
 char *nextsym;
 int symcount = 0;
 int symnum = 0;
+
+static inline bool validateChar(char c)
+{
+	return (c != ' ' || c != '\t' || c != '\n') &&
+	(c != '+' || c != '-' || c != '>' || c != '<' || c != '.' || c != ',' || c != '|' || c != '~');
+}
 
 void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 {
@@ -143,8 +150,54 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			fprintf(out, "\tmov %i, %%rax\n\tmov $0, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_read);
 			break;
 			
-			default:
-			break;	
+			case '~':
+			/*	Using regexes would be a good idea, it's a shame we aren't doing it
+			*	Python regexes would be especially useful
+			*/
+			if(!args.gotos)
+				break;
+			
+			i++;
+			int lsize = 0;
+			char *label = NULL;
+			while((i < procsize && validateChar(procbuf[i])) && procbuf[i] != ':')
+			{
+				lsize++;
+				label = realloc(label, lsize);
+				label[lsize-1] = procbuf[i];
+				i++;
+			}
+			lsize++;
+			if(!validateChar(prcobuf[i]))
+				free(label);
+			else
+			{
+				label = realloc(label, lsize);
+				label[lsize-1] = '\0';
+				fprintf(out, ".%s:\n", label);
+				free(label);
+			}
+
+			break;
+
+			case '|':
+			if(!args.gotos)
+				break;
+
+			i++;
+			int lsize = 0;
+			char *label = NULL;
+			while(i < procsize && validateChar(procbuf[i]))
+			{
+				lsize++;
+				label = realloc(label, lsize);
+				label[lsize-1] = procbuf[i];
+				i++;
+			}
+			lsize++;
+			label = realloc(label, lsize);
+			label[lsize-1] = '\0';
+			fprintf(out, "jmp %s", label);
 		}
 	}
 }
