@@ -13,7 +13,7 @@ char *nextsym;
 int symcount = 0;
 int symnum = 0;
 
-static inline bool validateChar(char c)
+static bool validateChar(char c)
 {
 	return (c != ' ' || c != '\t' || c != '\n') &&
 	(c != '+' || c != '-' || c != '>' || c != '<' || c != '.' || c != ',' || c != '|' || c != '~');

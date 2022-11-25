@@ -10,7 +10,7 @@
 
 Args_state_t args;
 
-static inline void print_help()
+static void print_help()
 {
 	printf(
 		"Usage: bfc infile [-O] [-Cbits] [-a [FILES] [-Idir] [-c] [-o [FILE]]\n" \
@@ -149,7 +149,8 @@ int main(int argc, char **argv)
 
 	/* Map procfd into memory */
 	size_t procsize = lseek(procfd, 0, SEEK_END);
-	void *procptr = mmap(NULL, procsize, PROT_WRITE | PROT_READ, MAP_PRIVATE, procfd, 0);
+	/* Add ten bytes as padding to prevent segfaults */
+	void *procptr = mmap(NULL, procsize + 10, PROT_WRITE | PROT_READ, MAP_PRIVATE, procfd, 0);
 
 	/* Open the output file and get moving */
 	FILE *of = fopen(args.outfile, "w+");
