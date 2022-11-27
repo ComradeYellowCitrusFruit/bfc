@@ -39,7 +39,7 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 			break;
 
 			case '-':
-			fprintf(out, "\tincb arr(, %%ecx)\n");
+			fprintf(out, "\tdecb arr(, %%ecx)\n");
 			break;
 
 			case '>':
@@ -73,11 +73,11 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 			break;
 
 			case '.':
-			fprintf(out, "\tmov %i, %%rax\n\tmov $1, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_write);
+			fprintf(out, "\tmov $%i, %%rax\n\tmov $1, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_write);
 			break;
 
 			case ',':
-			fprintf(out, "\tmov %i, %%rax\n\tmov $0, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_read);
+			fprintf(out, "\tmov $%i, %%rax\n\tmov $0, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_read);
 			break;
 			
 			case '~':
