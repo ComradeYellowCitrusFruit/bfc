@@ -3,8 +3,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+
+
+#ifndef _WIN32
+
 #include <sys/mman.h>
 #include <unistd.h>
+
+#else
+
+#include <Windows.h>
+
+#endif
+
 #include "include/args.h"
 #include "include/compile.h"
 
@@ -37,12 +48,19 @@ int main(int argc, char **argv)
 	}
 
 	/* Propagate this shit */
+#ifndef _WIN32
 	char procs[] = "/tmp/BFC_PROC_XXXXXX";
 	int procfd = mkstemp(procs);
+#else
+	char procs[MAX_PATH];
+	GetTempPath(MAX_PATH, procs);
+	HANDLE procfd = CreateFileA(procs, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_DELETE_ON_CLOSE | FLAG_ATTRIBUTE_HIDDEN);
+#endif
 	FILE *iF = NULL;
 	bool appending = false;
 	char *idir = NULL;
 	args.outfile = NULL;
+
 	for(int i = 1; i < argc; i++)
 	{
 		if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))
@@ -88,7 +106,12 @@ int main(int argc, char **argv)
 			while((c = fgetc(afile)) != EOF)
 			{
 				C = (char)c;
+#ifndef _WIN32
 				write(procfd, &C, 1);
+#else
+				DWORD junk;
+				WriteFile(procfd, &C, 1, &junk, NULL);
+#endif
 			}
 			fclose(afile);
 			if(idir != NULL)
@@ -112,7 +135,12 @@ int main(int argc, char **argv)
 			while((c = fgetc(iF)) != EOF)
 			{
 				C = (char)c;
+#ifndef _WIN32
 				write(procfd, &C, 1);
+#else
+				DWORD junk;
+				WriteFile(procfd, &C, 1, &junk, NULL);
+#endif
 			}
 			fclose(iF);
 
@@ -134,10 +162,16 @@ int main(int argc, char **argv)
 	else if(args.outfile == NULL)
 		args.outfile = "a.s";
 
+#ifndef _WIN32
 	/* Map procfd into memory */
 	size_t procsize = lseek(procfd, 0, SEEK_END);
-	/* Add ten bytes as padding to prevent segfaults */
-	void *procptr = mmap(NULL, procsize + 10, PROT_WRITE | PROT_READ, MAP_PRIVATE, procfd, 0);
+	void *procptr = mmap(NULL, procsize, PROT_WRITE | PROT_READ, MAP_PRIVATE, procfd, 0);
+#else 
+	/* What the other comment says */
+	DWORD procsize = GetFileSize(procfd, NULL);
+	HANDLE mapping = CreateFileMappingA(procfd, NULL, PAGE_READWRITE, 0, procsize, NULL);
+	void *procptr = MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, procsize);
+#endif
 
 	/* Open the output file and get moving */
 	FILE *of = fopen(args.outfile, "w+");
@@ -147,8 +181,13 @@ int main(int argc, char **argv)
 		compile(procptr, procsize, of);
 	
 	/* Clean up time */
+#ifndef _WIN32
 	munmap(procptr, procsize);
 	close(procfd);
 	unlink(procs);
+#else
+	UnmapViewOfFile(procptr);
+	CloseHandle(mapping);
+#endif
 	return 0;
 }

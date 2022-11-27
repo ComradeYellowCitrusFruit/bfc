@@ -19,7 +19,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 	fprintf(out, \
 		".text\n" \
 		".globl _start\n" \
-		".comm arr, 3000\n"
+		".comm arr, 3000, 2\n"
 		"_start:\n" \
 		"\txor %%ecx, %%ecx\n" \
 	);

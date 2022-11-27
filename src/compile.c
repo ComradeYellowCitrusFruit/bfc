@@ -14,7 +14,7 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 	fprintf(out, \
 		".text\n" \
 		".globl _start\n" \
-		".comm arr, 3000"
+		".comm arr, 3000, 2"
 		"_start:\n" \
 		"\txor %%ecx, %%ecx\n" \
 	);
