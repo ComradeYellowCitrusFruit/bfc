@@ -13,16 +13,11 @@ Args_state_t args;
 static void print_help()
 {
 	printf(
-		"Usage: bfc infile [-O] [-Cbits] [-a [FILES] [-Idir] [-c] [-o [FILE]]\n" \
+		"Usage: bfc infile [-O] [-a [FILES]] [-Idir] [-o [FILE]]\n" \
 		"-O - Enables optimizations\n" \
-		"-Cbits - Sets the cell bit width to be bits, bits can be 8, 16, or 32, default is 8 bits\n" \
-		"-a [FILES] - Appends [FILES] to the end of the infile, most useful with -Idir and -c set, will be appended even if no infile has been added yet\n" \
+		"-a [FILES] - Appends [FILES] to the end of the infile, most useful with -Idir, will be appended even if no infile has been added yet\n" \
 		"-Idir - Sets dir to be the search path for files\n" \
-		"-c - Enables gotos\n" \
 		"-o [FILE] - Sets the output file, default a.s\n" \
-		"Goto syntax:\n" \
-		"Setting a label can be done by writing a '~' followed by a string without spaces terminated by a colon\n" \
-		"Jumping to a label can be done by writing a '|' followed by the label name\n"
 	);
 }
 
@@ -31,7 +26,7 @@ int main(int argc, char **argv)
 	/* Handle args */
 	if(argc < 2)
 	{
-		printf("Usage: bfc infile [-O] [-Cbits] [-a [FILES] [-c] [-o [FILE]]\n");
+		printf("Usage: bfc infile [-O] [-a [FILES] [-o [FILE]]\n");
 		return -1;
 	}
 
@@ -55,11 +50,6 @@ int main(int argc, char **argv)
 			print_help();
 			return 0;
 		}
-		else if(!strncmp(argv[i], "-C", 2))
-		{
-			sscanf(argv[i], "-C%i", &(args.bits));
-			appending = false;
-		}
 		else if(!strcmp(argv[i], "-O"))
 		{
 			args.optimize = true;
@@ -70,11 +60,6 @@ int main(int argc, char **argv)
 		else if(!strncmp(argv[i], "-I", 2))
 		{
 			idir = argv[i] + 2;
-			appending = false;
-		}
-		else if(!strcmp(argv[i], "-c"))
-		{
-			args.gotos = true;
 			appending = false;
 		}
 		else if(!strcmp(argv[i], "-o"))
