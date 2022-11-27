@@ -25,7 +25,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 	fprintf(out, \
 		".text\n" \
 		".globl _start\n" \
-		".comm arr, 3000"
+		".comm arr, 3000\n"
 		"_start:\n" \
 		"\txor %%ecx, %%ecx\n" \
 	);
@@ -50,6 +50,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 				{
 					c++; i++;
 				}
+				i--;
 				fprintf(out, "\taddb $%i, arr(, %%ecx)\n", c);
 			}
 			/* Attempt to optimize useless adds and subtracts */
@@ -86,6 +87,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
                                 {
                                         c++; i++;
                                 }
+				i--;
                                 fprintf(out, "\tadd $%i, %%ecx\n", c);
                         }
                         /* Attempt to optimize useless adds and subtracts */
@@ -116,7 +118,10 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			case '[':
 			/* Detect a clearing of a cell and optimize it */
 			if(!strncmp(procbuf + i, "[-]", 3))
+			{
 				fprintf(out, "\tmovb $0, arr(, %%ecx)\n");
+				i += 2;
+			}
 			else
 			{
 				symcount++;
@@ -198,6 +203,13 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			label = realloc(label, lsize);
 			label[lsize-1] = '\0';
 			fprintf(out, "\tjmp %s\n", label);
+
+			default:
+			break;
 		}
+		i++;
 	}
+
+	fprintf(out, "\tmov $%i, %%rax\n\txor %%rdi, %%rdi\n\tsyscall\n", SYS_exit);
+	return;
 }

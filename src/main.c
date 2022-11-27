@@ -42,13 +42,13 @@ int main(int argc, char **argv)
 	}
 
 	/* Propagate this shit */
-	char procs[] = "PROC_XXXXXX";
+	char procs[] = "/tmp/BFC_PROC_XXXXXX";
 	int procfd = mkstemp(procs);
 	FILE *iF = NULL;
 	bool appending = false;
 	char *idir = NULL;
 	args.outfile = NULL;
-	for(int i = 0; i < argc; i++)
+	for(int i = 1; i < argc; i++)
 	{
 		if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help"))
 		{
@@ -164,5 +164,6 @@ int main(int argc, char **argv)
 	/* Clean up time */
 	munmap(procptr, procsize);
 	close(procfd);
+	unlink(procs);
 	return 0;
 }

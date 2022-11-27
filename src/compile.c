@@ -39,21 +39,7 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 			break;
 
 			case '-':
-			/* Attempt to optimize repeated decrements */
-			if(procbuf[i+1] == '-')
-			{
-				int c = 0;
-				while(procbuf[i] == '-' && i < size)
-				{
-					c++; i++;
-				}
-				fprintf(out, "\tsubb $%i, arr(, %%ecx)\n", c);
-			}
-			/* Attempt to optimize useless adds and subtracts */
-			else if(procbuf[i+1] == '+')
-				break;
-			else
-				fprintf(out, "\tincb arr(, %%ecx)\n");
+			fprintf(out, "\tincb arr(, %%ecx)\n");
 			break;
 
 			case '>':
@@ -150,4 +136,6 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 
 		i++;
 	}
+	fprintf(out, "\tmov $%i, %%rax\n\txor %%rdi, %%rdi\n\tsyscall\n", SYS_exit);
+        return;
 }
