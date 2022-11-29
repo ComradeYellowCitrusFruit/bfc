@@ -5,16 +5,21 @@
 #include <stdbool.h>
 
 #ifndef _WIN32
+
 #include <unistd.h>
 #include <sys/syscall.h>
+
 #else
+
 #define SYS_read 0
-#define SYS_write 0
+#define SYS_write 1
 #define SYS_exit 60
+
 #endif
 
 #include "include/args.h"
 #include "include/compile.h"
+#include "include/syscalls.h"
 
 char **symbols;
 char *nextsym;
@@ -23,14 +28,28 @@ int symnum = 0;
 
 void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 {
-	/* Initialize this shit */
-	fprintf(out, \
-		".text\n" \
-		".globl _start\n" \
-		".comm arr, 3000, 2\n"
-		"_start:\n" \
-		"\txor %%ecx, %%ecx\n" \
-	);
+	if(args.targ != -1)
+	{
+		/* Initialize this shit */
+		fprintf(out, \
+			".text\n" \
+			".globl _start\n" \
+			".lcomm arr, 3000, 2\n"
+			"_start:\n" \
+			"\txor %%ecx, %%ecx\n" \
+		);
+	}
+	else
+	{
+		/* Initialize this shit */
+		fprintf(out, \
+			".text\n" \
+			".globl main\n" \
+			".lcomm arr, 3000, 2\n"
+			"main:\n" \
+			"\txor %%ecx, %%ecx\n" \
+		);
+	}
 
 	symbols = malloc(1);
 	nextsym = malloc(strlen(".L0") + 1);
@@ -81,41 +100,41 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			break;
 
 			case '>':
-                        /* Attempt to optimize repeated increments */
-                        if(procbuf[i+1] == '>')
-                        {
-                                int c = 0;
-                                while(procbuf[i] == '>' && i < size)
-                                {
-                                        c++; i++;
-                                }
+            /* Attempt to optimize repeated increments */
+            if(procbuf[i+1] == '>')
+            {
+                int c = 0;
+                while(procbuf[i] == '>' && i < size)
+                {
+                    c++; i++;
+                }
 				i--;
-                                fprintf(out, "\tadd $%i, %%ecx\n", c);
-                        }
-                        /* Attempt to optimize useless adds and subtracts */
-                        else if(procbuf[i+1] == '<')
-                                break;
-                        else
-                                fprintf(out, "\tinc %%ecx\n");
-                        break;
+                fprintf(out, "\tadd $%i, %%ecx\n", c);
+                }
+                /* Attempt to optimize useless adds and subtracts */
+                else if(procbuf[i+1] == '<')
+                    break;
+                else
+                    fprintf(out, "\tinc %%ecx\n");
+                break;
 
-                        case '<':
-                        /* Attempt to optimize repeated decrements */
-                        if(procbuf[i+1] == '<')
-                        {
-                                int c = 0;
-                                while(procbuf[i] == '<' && i < size)
-                                {
-                                        c++; i++;
-                                }
-                                fprintf(out, "\tsub $%i, %%ecx\n", c);
-                        }
-                        /* Attempt to optimize useless adds and subtracts */
-                        else if(procbuf[i+1] == '>')
-                                break;
-                        else
-                                fprintf(out, "\tdec %%ecx\n");
-                        break;
+            case '<':
+            /* Attempt to optimize repeated decrements */
+            if(procbuf[i+1] == '<')
+            {
+                int c = 0;
+                while(procbuf[i] == '<' && i < size)
+                {
+                    c++; i++;
+                }
+                fprintf(out, "\tsub $%i, %%ecx\n", c);
+            }
+            /* Attempt to optimize useless adds and subtracts */
+            else if(procbuf[i+1] == '>')
+                break;
+            else
+                fprintf(out, "\tdec %%ecx\n");
+            break;
 
 			case '[':
 			/* Detect a clearing of a cell and optimize it */
@@ -150,11 +169,11 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 
 			/* TODO: Add syscall optimizations */
 			case '.':
-			fprintf(out, "\tmov $%i, %%rax\n\tmov $1, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_write);
+			fprintf(out, getOutStr());
 			break;
 
 			case ',':
-			fprintf(out, "\tmov $%i, %%rax\n\tmov $0, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_read);
+			fprintf(out, getInStr());
 
 			default:
 			break;
@@ -162,6 +181,6 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 		i++;
 	}
 
-	fprintf(out, "\tmov $%i, %%rax\n\txor %%rdi, %%rdi\n\tsyscall\n", SYS_exit);
+	fprintf(out, getExitStr());
 	return;
 }

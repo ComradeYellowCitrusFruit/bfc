@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <string.h>
 
-
 #ifndef _WIN32
 
 #include <sys/mman.h>
@@ -29,6 +28,7 @@ static void print_help()
 		"-a [FILES] - Appends [FILES] to the end of the infile, most useful with -Idir, will be appended even if no infile has been added yet\n" \
 		"-Idir - Sets dir to be the search path for files\n" \
 		"-o [FILE] - Sets the output file, default a.s\n" \
+		"--target-os=[OS] - Sets the target operating system, default is host, valid values are linux/gnu-linux/linux-gnu, Win/Win32/NT, openbsd, freebsd, or host\n"
 	);
 }
 
@@ -54,12 +54,13 @@ int main(int argc, char **argv)
 #else
 	char procs[MAX_PATH];
 	GetTempPath(MAX_PATH, procs);
-	HANDLE procfd = CreateFileA(procs, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_DELETE_ON_CLOSE | FLAG_ATTRIBUTE_HIDDEN);
+	HANDLE procfd = CreateFileA(procs, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_DELETE_ON_CLOSE);
 #endif
 	FILE *iF = NULL;
 	bool appending = false;
 	char *idir = NULL;
 	args.outfile = NULL;
+	args.targ = HOST;
 
 	for(int i = 1; i < argc; i++)
 	{
@@ -149,6 +150,35 @@ int main(int argc, char **argv)
 				free(name);
 			}
 		}
+		else if(!strncmp(argv[i], "--target-os", strlen("--target-os")))
+		{
+			int j = 0;
+
+			while(argv[i][j] != '=' && argv[i][j]) 
+				j++;
+
+			if(!argv[i][j])
+				printf("Invalid use of --target-os - '%s'\n", argv[i]);
+			else
+			{
+				char *osstr = argv[i] + j;
+				if(!strcmp(osstr, "linux") || !strcmp(osstr, "linux-gnu") || !strcmp(osstr, "gnu-linux"))
+					args.targ = LINUX;
+				else if(!strcmp(osstr, "Win") || !strcmp(osstr, "Win32") || !strcmp(osstr, "NT"))
+					args.targ = WIN32;
+				else if(!strcmp(osstr, "openbsd"))
+					args.targ = OPENBSD;
+				else if(!strcmp(osstr, "freebsd"))
+					args.targ = FREEBSD;
+				else if(!strcmp(osstr, "host"))
+					args.targ = HOST;
+				else
+				{
+					printf("Invalid value of [OS] in --target-os=[OS]: '%s'", osstr);
+				}
+			}
+
+		}
 		else
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
 	}
@@ -161,6 +191,12 @@ int main(int argc, char **argv)
 	}
 	else if(args.outfile == NULL)
 		args.outfile = "a.s";
+
+	if(args.targ == WIN32)
+		printf( \
+			"In order to successfully create a final executable from this output, you will need to link with your libc.\n" \
+			"Output assembly will be in AT&T/GNU as syntax, which you may need to convert to your assembler's syntax.\n" \
+		);
 
 #ifndef _WIN32
 	/* Map procfd into memory */

@@ -5,12 +5,16 @@
 #include <stdbool.h>
 
 #ifndef _WIN32
+
 #include <unistd.h>
 #include <sys/syscall.h>
+
 #else
+
 #define SYS_read 0
 #define SYS_write 0
 #define SYS_exit 60
+
 #endif
 
 #include "include/args.h"
