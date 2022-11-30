@@ -4,6 +4,8 @@ CFLAGS=-O2 -Wpedantic -Wall
 
 CC=cc
 
+installdir=/usr/bin
+
 .PHONY: all
 all: bfc
 
@@ -22,4 +24,4 @@ clean:
 
 .PHONY: install
 install:
-	cp bfc /usr/local/bfc
+	cp bfc $(installdir)/bfc

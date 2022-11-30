@@ -10,6 +10,17 @@ All you need to compile bfc is a C compiler and make.
 All you need to assemble a program produced by bfc is an AT&T syntax compatible assembler and linker.
 On Windows you also need to link with libc since Windows system calls can't be made directly.
 
+## Compiling
+
+To compile bfc, you can just run `make` or `make all`.
+If you need to override the C compiler to use (default is `cc`) you can add `CC={YOUR C COMPILER}` to the end of the command.
+If you need to override the C flags, append `CFLAGS={YOUR CFLAGS}` to the command.
+
+## Installing
+
+To install bfc, you can just run `make install`.
+If you need to override the install directory (default is `/usr/bin`), append `installdir={YOUR INSTALL DIRECTORY}` to the end of the command.
+
 ## Arguments
 
 - `-h`: prints a help message
