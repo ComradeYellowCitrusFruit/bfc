@@ -2,6 +2,8 @@ incdir = ./
 srcdir = ./src
 CFLAGS=-O2 -Wpedantic -Wall
 
+CC=cc
+
 .PHONY: all
 all: bfc
 

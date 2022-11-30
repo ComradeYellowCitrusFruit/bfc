@@ -1,9 +1,14 @@
 # A simple optimizing brainfuck compiler
 
 bfc (shorthand for Brainfuck Compiler) is a simple optimizing brainfuck compiler.
-It produces assembly code, using system calls for the `,` and `.` instructions.
-At the moment, it does not support Windows, only \*nix systems.
-Produced code only supports amd64 linux at the moment.
+It produces AT&T syntax assembly code, using system calls for the `,` and `.` instructions.
+
+## Dependencies
+
+All you need to compile bfc is a C compiler and make.
+
+All you need to assemble a program produced by bfc is an AT&T syntax compatible assembler and linker.
+On Windows you also need to link with libc since Windows system calls can't be made directly.
 
 ## Arguments
 
@@ -18,6 +23,4 @@ Produced code only supports amd64 linux at the moment.
 
 ## TODOs
 
-- Implement changing the cell count
 - Implement the procedure extensions
-- Implement changes to target OS
