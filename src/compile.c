@@ -19,17 +19,32 @@
 
 #include "include/args.h"
 #include "include/compile.h"
+#include "include/syscalls.h"
 
 void compile(uint8_t *procbuf, size_t size, FILE *out)
 {
-	/* Initialize this shit */
-	fprintf(out, \
-		".text\n" \
-		".globl _start\n" \
-		".comm arr, 3000, 2"
-		"_start:\n" \
-		"\txor %%ecx, %%ecx\n" \
-	);
+	if(args.targ != -1)
+	{
+		/* Initialize this shit */
+		fprintf(out, \
+			".text\n" \
+			".globl _start\n" \
+			".lcomm arr, 3000, 2\n"
+			"_start:\n" \
+			"\txor %%ecx, %%ecx\n" \
+		, args.cells);
+	}
+	else
+	{
+		/* Initialize this shit */
+		fprintf(out, \
+			".text\n" \
+			".globl main\n" \
+			".lcomm arr, %i, 2\n"
+			"main:\n" \
+			"\txor %%ecx, %%ecx\n" \
+		, args.cells);
+	}
 
 	symbols = malloc(1);
 	nextsym = malloc(strlen(".L0") + 1);
@@ -79,11 +94,11 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 			break;
 
 			case '.':
-			fprintf(out, "\tmov $%i, %%rax\n\tmov $1, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_write);
+			fprintf(out, getOutStr());
 			break;
 
 			case ',':
-			fprintf(out, "\tmov $%i, %%rax\n\tmov $0, %%rdi\n\tlea arr(, %%ecx), %%rsi\n\tmov $1, %%rdx\n\tpush %%rcx\n\tsyscall\n\tpop %%rcx\n", SYS_read);
+			fprintf(out, getInStr());
 
 			default:
 			break;
@@ -91,6 +106,6 @@ void compile(uint8_t *procbuf, size_t size, FILE *out)
 
 		i++;
 	}
-	fprintf(out, "\tmov $%i, %%rax\n\txor %%rdi, %%rdi\n\tsyscall\n", SYS_exit);
+	fprintf(out, getExitStr());
         return;
 }

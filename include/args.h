@@ -21,7 +21,9 @@
 typedef struct
 {
 	bool optimize;
+	bool procedures;
 	int targ;
+	int cells;
 	char *outfile;
 } Args_state_t;
 

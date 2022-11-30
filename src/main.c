@@ -20,7 +20,7 @@
 
 Args_state_t args;
 
-static void print_help()
+static inline void print_help()
 {
 	printf(
 		"Usage: bfc infile [-O] [-a [FILES]] [-Idir] [-o [FILE]]\n" \
@@ -30,6 +30,12 @@ static void print_help()
 		"-o [FILE] - Sets the output file, default a.s\n" \
 		"--target-os=[OS] - Sets the target operating system, default is host, valid values are linux/gnu-linux/linux-gnu, Win/Win32/NT, openbsd, freebsd, or host\n"
 	);
+}
+
+static inline bool isCommand(char c)
+{
+	return ((c == '+' || c == '-' || c == '>' || c == '<' || c == ',' || c == '.')
+	|| ((c == '(' || c == ')') && args.procedures));
 }
 
 int main(int argc, char **argv)
@@ -54,7 +60,7 @@ int main(int argc, char **argv)
 #else
 	char procs[MAX_PATH];
 	GetTempPath(MAX_PATH, procs);
-	HANDLE procfd = CreateFileA(procs, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_DELETE_ON_CLOSE);
+	HANDLE procfd = CreateFileA(procs, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_DELETE_ON_CLOSE, NULL);
 #endif
 	FILE *iF = NULL;
 	bool appending = false;
@@ -107,12 +113,15 @@ int main(int argc, char **argv)
 			while((c = fgetc(afile)) != EOF)
 			{
 				C = (char)c;
+				if (isCommand(C))
+				{				
 #ifndef _WIN32
 				write(procfd, &C, 1);
 #else
 				DWORD junk;
 				WriteFile(procfd, &C, 1, &junk, NULL);
 #endif
+				}
 			}
 			fclose(afile);
 			if(idir != NULL)
@@ -136,12 +145,15 @@ int main(int argc, char **argv)
 			while((c = fgetc(iF)) != EOF)
 			{
 				C = (char)c;
+				if (isCommand(C))
+				{				
 #ifndef _WIN32
 				write(procfd, &C, 1);
 #else
 				DWORD junk;
 				WriteFile(procfd, &C, 1, &junk, NULL);
 #endif
+				}
 			}
 			fclose(iF);
 
@@ -178,6 +190,13 @@ int main(int argc, char **argv)
 				}
 			}
 
+		}
+		else if(!strncmp(argv[i], "-C", 2) && strncmp(argv[i], "-Cf", 3))
+		{
+			sscanf(argv[i], "-C%i", &args.cells);
+
+			/* Strip to a reasonable size */
+			args.cells &= 0xFFFFFF;
 		}
 		else
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);

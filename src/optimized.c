@@ -37,7 +37,7 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 			".lcomm arr, 3000, 2\n"
 			"_start:\n" \
 			"\txor %%ecx, %%ecx\n" \
-		);
+		, args.cells);
 	}
 	else
 	{
@@ -45,10 +45,10 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 		fprintf(out, \
 			".text\n" \
 			".globl main\n" \
-			".lcomm arr, 3000, 2\n"
+			".lcomm arr, %i, 2\n"
 			"main:\n" \
 			"\txor %%ecx, %%ecx\n" \
-		);
+		, args.cells);
 	}
 
 	symbols = malloc(1);
