@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
 
 #ifndef _WIN32
 
@@ -108,6 +109,11 @@ int main(int argc, char **argv)
 				name = argv[i];
 
 			FILE *afile = fopen(name, "r");
+			if(errno)
+			{
+				fprintf(stderr, "Error opening file '%s': %s\n", name, strerror(errno));
+				return -1;
+			}
 			int c;
 			char C;
 			while((c = fgetc(afile)) != EOF)
@@ -127,7 +133,7 @@ int main(int argc, char **argv)
 			if(idir != NULL)
 				free(name);
 		}
-		else if(iF == NULL)
+		else if(iF == NULL && argv[i][0] != '-')
 		{
 			char *name;
 			if(idir != NULL)
@@ -140,6 +146,11 @@ int main(int argc, char **argv)
 				name = argv[i];
 
 			iF = fopen(name, "r");
+			if(errno)
+			{
+				fprintf(stderr, "Error opening file '%s': %s\n", name, strerror(errno));
+				return -1;
+			}
 			int c;
 			char C;
 			while((c = fgetc(iF)) != EOF)
@@ -186,7 +197,7 @@ int main(int argc, char **argv)
 					args.targ = HOST;
 				else
 				{
-					printf("Invalid value of [OS] in --target-os=[OS]: '%s'", osstr);
+					printf("Invalid value of [OS] in --target-os=[OS]: '%s', defaulting to host.\n", osstr);
 				}
 			}
 
@@ -223,15 +234,37 @@ int main(int argc, char **argv)
 	/* Map procfd into memory */
 	size_t procsize = lseek(procfd, 0, SEEK_END);
 	void *procptr = mmap(NULL, procsize, PROT_WRITE | PROT_READ, MAP_PRIVATE, procfd, 0);
+	if(errno == ENOMEM)
+	{
+		fprintf(stderr, strerror(errno));
+		return -1;
+	}
 #else 
 	/* What the other comment says */
 	DWORD procsize = GetFileSize(procfd, NULL);
 	HANDLE mapping = CreateFileMappingA(procfd, NULL, PAGE_READWRITE, 0, procsize, NULL);
+	if(errno == ENOMEM)
+	{
+		fprintf(stderr, strerror(errno));
+		return -1;
+	}
+
 	void *procptr = MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, procsize);
+	if(errno == ENOMEM)
+	{
+		fprintf(stderr, strerror(errno));
+		return -1;
+	}
 #endif
 
 	/* Open the output file and get moving */
 	FILE *of = fopen(args.outfile, "w+");
+	if(errno)
+	{
+		fprintf(stderr, "Error opening file '%s': %s", args.outfile, strerror(errno));
+		return -1;
+	}
+
 	if(args.optimize)
 		compile_optimized(procptr, procsize, of);
 	else
