@@ -198,6 +198,8 @@ int main(int argc, char **argv)
 			/* Strip to a reasonable size */
 			args.cells &= 0xFFFFFF;
 		}
+		else if(!strncmp(argv[i], "-Cf", 3))
+			sscanf(argv[i], "-Cf%i", &args.cells);
 		else
 			fprintf(stderr, "Invalid argument: %s\n", argv[i]);
 	}
