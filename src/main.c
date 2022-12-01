@@ -35,7 +35,7 @@ static inline void print_help()
 
 static inline bool isCommand(char c)
 {
-	return ((c == '+' || c == '-' || c == '>' || c == '<' || c == ',' || c == '.')
+	return ((c == '+' || c == '-' || c == '>' || c == '<' || c == ',' || c == '.' || c == '[' || c == ']')
 	|| ((c == '(' || c == ')') && args.procedures));
 }
 
