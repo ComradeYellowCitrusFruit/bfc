@@ -169,11 +169,11 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 
 			/* TODO: Add syscall optimizations */
 			case '.':
-			fprintf(out, getOutStr());
+			fprintf(out, "%s", getOutStr());
 			break;
 
 			case ',':
-			fprintf(out, getInStr());
+			fprintf(out, "%s", getInStr());
 
 			default:
 			break;
@@ -181,6 +181,6 @@ void compile_optimized(uint8_t *procbuf, size_t size, FILE *out)
 		i++;
 	}
 
-	fprintf(out, getExitStr());
+	fprintf(out, "%s", getExitStr());
 	return;
 }

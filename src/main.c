@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	bool appending = false;
 	char *idir = NULL;
 	args.outfile = NULL;
-	args.targ = HOST;
+	args.targ = HOST_OS;
 
 	for(int i = 1; i < argc; i++)
 	{
@@ -179,6 +179,7 @@ int main(int argc, char **argv)
 
 			while(argv[i][j] != '=' && argv[i][j]) 
 				j++;
+			j++;
 
 			if(!argv[i][j])
 				printf("Invalid use of --target-os - '%s'\n", argv[i]);
@@ -186,15 +187,15 @@ int main(int argc, char **argv)
 			{
 				char *osstr = argv[i] + j;
 				if(!strcmp(osstr, "linux") || !strcmp(osstr, "linux-gnu") || !strcmp(osstr, "gnu-linux"))
-					args.targ = LINUX;
+					args.targ = OS_LINUX;
 				else if(!strcmp(osstr, "Win") || !strcmp(osstr, "Win32") || !strcmp(osstr, "NT"))
-					args.targ = WIN32;
+					args.targ = OS_WIN32;
 				else if(!strcmp(osstr, "openbsd"))
-					args.targ = OPENBSD;
+					args.targ = OS_OPENBSD;
 				else if(!strcmp(osstr, "freebsd"))
-					args.targ = FREEBSD;
+					args.targ = OS_FREEBSD;
 				else if(!strcmp(osstr, "host"))
-					args.targ = HOST;
+					args.targ = HOST_OS;
 				else
 				{
 					printf("Invalid value of [OS] in --target-os=[OS]: '%s', defaulting to host.\n", osstr);
@@ -224,7 +225,7 @@ int main(int argc, char **argv)
 	else if(args.outfile == NULL)
 		args.outfile = "a.s";
 
-	if(args.targ == WIN32)
+	if(args.targ == OS_WIN32)
 		printf( \
 			"In order to successfully create a final executable from this output, you will need to link with your libc.\n" \
 			"Output assembly will be in AT&T/GNU as syntax, which you may need to convert to your assembler's syntax.\n" \

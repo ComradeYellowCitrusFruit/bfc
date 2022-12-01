@@ -23,9 +23,9 @@ char *getOutStr()
 {
 	if(!args.targ)
 		return linux_outcall;
-	else if(args.targ == OPENBSD)
+	else if(args.targ == OS_OPENBSD)
 		return openbsd_outcall;
-	else if(args.targ == FREEBSD)
+	else if(args.targ == OS_FREEBSD)
 		return freebsd_outcall;
 	else
 		return win32_outcall;
@@ -36,9 +36,9 @@ char *getInStr()
 {
 	if(!args.targ)
 		return linux_incall;
-	else if(args.targ == OPENBSD)
+	else if(args.targ == OS_OPENBSD)
 		return openbsd_incall;
-	else if(args.targ == FREEBSD)
+	else if(args.targ == OS_FREEBSD)
 		return freebsd_incall;
 	else
 		return win32_incall;
@@ -49,9 +49,9 @@ char *getExitStr()
 {
 	if(!args.targ)
 		return linux_exitcall;
-	else if(args.targ == OPENBSD)
+	else if(args.targ == OS_OPENBSD)
 		return openbsd_exitcall;
-	else if(args.targ == FREEBSD)
+	else if(args.targ == OS_FREEBSD)
 		return freebsd_exitcall;
 	else
 		return win32_exitcall;
