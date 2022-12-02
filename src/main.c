@@ -35,7 +35,7 @@ Args_state_t args;
 static inline void print_help()
 {
 	printf(
-		"Usage: bfc infile [-O] [-a [FILES]] [-Idir] [-o [FILE]]\n" \
+		"Usage: bfc infile [-O] [-a [FILES]] [-Idir] [--target-os=[OS]] [-o [FILE]]\n" \
 		"-O - Enables optimizations\n" \
 		"-a [FILES] - Appends [FILES] to the end of the infile, most useful with -Idir, will be appended even if no infile has been added yet\n" \
 		"-Idir - Sets dir to be the search path for files\n" \
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 	/* Handle args */
 	if(argc < 2)
 	{
-		printf("Usage: bfc infile [-O] [-a [FILES] [-o [FILE]]\n");
+		printf("Usage: bfc infile [-O] [-a [FILES]] [-Idir] [--target-os=[OS]] [-o [FILE]]\n");
 		return -1;
 	}
 
